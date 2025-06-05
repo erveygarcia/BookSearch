@@ -7,7 +7,7 @@ import Auth from '../utils/auth';
 import { removeBookId } from '../utils/localStorage';
 
 const SavedBooks = () => {
-  const { loading, data, refetch } = useQuery(GET_ME);
+  const { loading, data } = useQuery(GET_ME);
   const [removeBook] = useMutation(REMOVE_BOOK);
 
   const userData = data?.me || {
@@ -22,11 +22,16 @@ const SavedBooks = () => {
     try {
       await removeBook({
         variables: { bookId },
+        update(cache, { data }) {
+          const updatedUser = data?.removeBook;
+          cache.writeQuery({
+            query: GET_ME,
+            data: { me: updatedUser },
+          });
+        },
       });
 
-      // Actualiza la UI manualmente después de eliminar
       removeBookId(bookId);
-      await refetch();
     } catch (err) {
       console.error(err);
     }
@@ -64,7 +69,7 @@ const SavedBooks = () => {
                 )}
                 <Card.Body>
                   <Card.Title>{book.title}</Card.Title>
-                  <p className='small'>Authors: {book.authors.join(', ')}</p>
+                  <p className='small'>Authors: {book.authors?.join(', ')}</p>
                   <Card.Text>{book.description}</Card.Text>
                   <Button
                     className='btn-block btn-danger'

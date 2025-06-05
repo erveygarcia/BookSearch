@@ -1,3 +1,4 @@
+// auth.ts
 import type { Request } from 'express';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
@@ -10,7 +11,7 @@ interface JwtPayload {
   email: string;
 }
 
-const secretKey = process.env.JWT_SECRET_KEY || '';
+const secretKey = process.env.JWT_SECRET || 'default-secret';
 const expiresIn = '1h';
 
 export const signToken = (username: string, email: string, _id: string) => {
@@ -18,10 +19,8 @@ export const signToken = (username: string, email: string, _id: string) => {
   return jwt.sign(payload, secretKey, { expiresIn });
 };
 
-// NUEVA función para Apollo
 export const authMiddleware = ({ req }: { req: Request }) => {
   const authHeader = req.headers.authorization || '';
-
   let token = '';
 
   if (authHeader.startsWith('Bearer ')) {

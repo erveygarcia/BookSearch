@@ -25,8 +25,8 @@ const SearchBooks = () => {
   const [saveBook] = useMutation(SAVE_BOOK);
 
   useEffect(() => {
-    return () => saveBookIds(savedBookIds);
-  });
+    saveBookIds(savedBookIds);
+  }, [savedBookIds]);
 
   const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -57,9 +57,8 @@ const SearchBooks = () => {
   };
 
   const handleSaveBook = async (bookId: string) => {
-    const bookToSave: Book = searchedBooks.find((book) => book.bookId === bookId)!;
-
-    if (!Auth.loggedIn()) return false;
+    const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
+    if (!bookToSave || !Auth.loggedIn()) return;
 
     try {
       await saveBook({

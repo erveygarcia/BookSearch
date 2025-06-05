@@ -5,15 +5,11 @@ import { Form, Button, Alert } from 'react-bootstrap';
 
 import { LOGIN_USER } from '../mutations';
 import Auth from '../utils/auth';
-import type { User } from '../models/User';
 
-// biome-ignore lint/correctness/noEmptyPattern: <explanation>
-const LoginForm = ({}: { handleModalClose: () => void }) => {
-  const [userFormData, setUserFormData] = useState<User>({
-    username: '',
+const LoginForm = ({ handleModalClose }: { handleModalClose: () => void }) => {
+  const [formData, setFormData] = useState({
     email: '',
     password: '',
-    savedBooks: [],
   });
   const [validated] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
@@ -22,7 +18,7 @@ const LoginForm = ({}: { handleModalClose: () => void }) => {
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    setUserFormData({ ...userFormData, [name]: value });
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -37,40 +33,44 @@ const LoginForm = ({}: { handleModalClose: () => void }) => {
     try {
       const { data } = await login({
         variables: {
-          email: userFormData.email,
-          password: userFormData.password,
+          email: formData.email,
+          password: formData.password,
         },
       });
 
       Auth.login(data.login.token);
+      handleModalClose(); // Cierra el modal si se pasó como prop
     } catch (err) {
       console.error(err);
       setShowAlert(true);
     }
 
-    setUserFormData({
-      username: '',
+    setFormData({
       email: '',
       password: '',
-      savedBooks: [],
     });
   };
 
   return (
     <>
       <Form noValidate validated={validated} onSubmit={handleFormSubmit}>
-        <Alert dismissible onClose={() => setShowAlert(false)} show={showAlert || !!error} variant='danger'>
+        <Alert
+          dismissible
+          onClose={() => setShowAlert(false)}
+          show={showAlert || !!error}
+          variant='danger'
+        >
           Something went wrong with your login credentials!
         </Alert>
 
         <Form.Group className='mb-3'>
           <Form.Label htmlFor='email'>Email</Form.Label>
           <Form.Control
-            type='text'
+            type='email'
             placeholder='Your email'
             name='email'
             onChange={handleInputChange}
-            value={userFormData.email || ''}
+            value={formData.email}
             required
           />
           <Form.Control.Feedback type='invalid'>Email is required!</Form.Control.Feedback>
@@ -83,16 +83,17 @@ const LoginForm = ({}: { handleModalClose: () => void }) => {
             placeholder='Your password'
             name='password'
             onChange={handleInputChange}
-            value={userFormData.password || ''}
+            value={formData.password}
             required
           />
           <Form.Control.Feedback type='invalid'>Password is required!</Form.Control.Feedback>
         </Form.Group>
 
         <Button
-          disabled={!(userFormData.email && userFormData.password)}
+          disabled={!(formData.email && formData.password)}
           type='submit'
-          variant='success'>
+          variant='success'
+        >
           Submit
         </Button>
       </Form>

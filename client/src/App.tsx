@@ -11,12 +11,12 @@ import { setContext } from '@apollo/client/link/context';
 
 import Navbar from './components/Navbar';
 
-// Enlace al backend GraphQL
+// Enlace al backend GraphQL local
 const httpLink = createHttpLink({
-  uri: '/graphql',
+  uri: 'http://localhost:3001/graphql',
 });
 
-// Adjuntar token JWT automáticamente a cada solicitud
+// Adjuntar token JWT automáticamente
 const authLink = setContext((_, { headers }) => {
   const token = localStorage.getItem('id_token');
   return {
@@ -27,7 +27,6 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
-// Configuración del cliente de Apollo
 const client = new ApolloClient({
   link: authLink.concat(httpLink),
   cache: new InMemoryCache(),

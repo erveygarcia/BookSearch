@@ -5,15 +5,12 @@ import { Form, Button, Alert } from 'react-bootstrap';
 
 import { ADD_USER } from '../mutations';
 import Auth from '../utils/auth';
-import type { User } from '../models/User';
 
-// biome-ignore lint/correctness/noEmptyPattern: <explanation>
-const SignupForm = ({}: { handleModalClose: () => void }) => {
-  const [userFormData, setUserFormData] = useState<User>({
+const SignupForm = ({ handleModalClose }: { handleModalClose: () => void }) => {
+  const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
-    savedBooks: [],
   });
   const [validated] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
@@ -22,7 +19,7 @@ const SignupForm = ({}: { handleModalClose: () => void }) => {
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    setUserFormData({ ...userFormData, [name]: value });
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -37,30 +34,35 @@ const SignupForm = ({}: { handleModalClose: () => void }) => {
     try {
       const { data } = await addUser({
         variables: {
-          username: userFormData.username,
-          email: userFormData.email,
-          password: userFormData.password,
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
         },
       });
 
       Auth.login(data.addUser.token);
+      handleModalClose();
     } catch (err) {
       console.error(err);
       setShowAlert(true);
     }
 
-    setUserFormData({
+    setFormData({
       username: '',
       email: '',
       password: '',
-      savedBooks: [],
     });
   };
 
   return (
     <>
       <Form noValidate validated={validated} onSubmit={handleFormSubmit}>
-        <Alert dismissible onClose={() => setShowAlert(false)} show={showAlert || !!error} variant='danger'>
+        <Alert
+          dismissible
+          onClose={() => setShowAlert(false)}
+          show={showAlert || !!error}
+          variant='danger'
+        >
           Something went wrong with your signup!
         </Alert>
 
@@ -71,7 +73,7 @@ const SignupForm = ({}: { handleModalClose: () => void }) => {
             placeholder='Your username'
             name='username'
             onChange={handleInputChange}
-            value={userFormData.username || ''}
+            value={formData.username}
             required
           />
           <Form.Control.Feedback type='invalid'>Username is required!</Form.Control.Feedback>
@@ -84,7 +86,7 @@ const SignupForm = ({}: { handleModalClose: () => void }) => {
             placeholder='Your email address'
             name='email'
             onChange={handleInputChange}
-            value={userFormData.email || ''}
+            value={formData.email}
             required
           />
           <Form.Control.Feedback type='invalid'>Email is required!</Form.Control.Feedback>
@@ -97,16 +99,17 @@ const SignupForm = ({}: { handleModalClose: () => void }) => {
             placeholder='Your password'
             name='password'
             onChange={handleInputChange}
-            value={userFormData.password || ''}
+            value={formData.password}
             required
           />
           <Form.Control.Feedback type='invalid'>Password is required!</Form.Control.Feedback>
         </Form.Group>
 
         <Button
-          disabled={!(userFormData.username && userFormData.email && userFormData.password)}
+          disabled={!(formData.username && formData.email && formData.password)}
           type='submit'
-          variant='success'>
+          variant='success'
+        >
           Submit
         </Button>
       </Form>
