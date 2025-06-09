@@ -13,8 +13,9 @@ import Navbar from './components/Navbar';
 
 // Enlace al backend GraphQL local
 const httpLink = createHttpLink({
-  uri: 'http://localhost:3001/graphql',
+  uri: 'https://book-backend-lgzm.onrender.com/graphql',
 });
+
 
 // Adjuntar token JWT automáticamente
 const authLink = setContext((_, { headers }) => {
